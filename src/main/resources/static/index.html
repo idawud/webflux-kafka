@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Kafka SSE Messages</title>
+    <style>
+        body { font-family: monospace; }
+        #messages {
+            white-space: pre-wrap;
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 400px;
+            overflow-y: scroll;
+        }
+    </style>
+</head>
+<body>
+<h2>Kafka Messages via SSE</h2>
+<div id="messages">Connecting...\n</div>
+
+<script>
+    const messagesDiv = document.getElementById('messages');
+    messagesDiv.textContent = '';
+
+    function setupSSE() {
+        const es = new EventSource('/messages/sse');
+
+        es.onopen = function () {
+            messagesDiv.textContent += '🔌 Connection established.\n';
+        };
+
+        es.onmessage = function (event) {
+            messagesDiv.textContent += event.data + '\n';
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        };
+
+        es.onerror = function () {
+            messagesDiv.textContent += '⚠️ Connection lost... retrying in 3s\n';
+            es.close();
+            setTimeout(setupSSE, 3000);
+        };
+
+        // store globally to allow replacement if needed
+        window.eventSource = es;
+    }
+
+    setupSSE();
+</script>
+</body>
+</html>
