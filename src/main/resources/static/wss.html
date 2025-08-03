@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>WebSocket Client</title>
+    <link rel="stylesheet" href="wss.css">
 </head>
 <body>
 <script>
@@ -30,14 +31,29 @@
 
     function sendMessage() {
         const message = {
-            type: 'message',
-            content: 'Hello from browser',
-            sender: 'browser-' + Math.random().toString(36).substring(2, 10)
+            type: 'REQUEST',
+            content: document.getElementById('messageContent').value.trim(),
+            sender: window.sessionSenderId || (window.sessionSenderId = 'browser-' + Math.random().toString(36).substring(2, 10))
         };
+        if (message.content === '') {
+            alert('Message cannot be empty');
+            return;
+        }
+        console.log('Sending:', message);
         socket.send(JSON.stringify(message));
+
+        // Show toast notification
+        const toast = document.createElement('div');
+        toast.textContent = 'Message sent!';
+        toast.className = 'toast';
+        document.body.appendChild(toast);
+        setTimeout(() => { toast.remove(); }, 2000);
+
+        // Reset textarea
+        document.getElementById('messageContent').value = '';
     }
 </script>
-
-<button onclick="sendMessage()">Send Message</button>
+<textarea id="messageContent" rows="10" cols="100" placeholder="Type your message here"></textarea><br>
+<button class="send-btn" onclick="sendMessage()">Send Message</button>
 </body>
 </html>
